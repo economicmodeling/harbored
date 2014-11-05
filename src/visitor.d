@@ -756,7 +756,7 @@ struct Item
 		if (url == "#")
 			f.write(name, `</td>`);
 		else
-			f.write(`<a href="`, stripLeadingDirectory(url), `">`, name, `</a></td>`);
+			f.write(`<a href="`, url, `">`, name, `</a></td>`);
 		if (type is null)
 			f.write(`<td></td><td>`, summary ,`</td></tr>`);
 		else

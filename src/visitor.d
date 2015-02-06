@@ -210,10 +210,10 @@ class DocVisitor : ASTVisitor
 			writeBreadcrumbs(f);
 			string summary = readAndWriteComment(f, vd.comment, macros, prevComments);
 			string storageClass;
-			foreach (attr; vd.attributes)
+			foreach (storage; vd.storageClasses)
 			{
-				if (attr.storageClass !is null)
-					storageClass = str(attr.storageClass.token.type);
+				if (storage !is null)
+					storageClass = str(storage.token.type);
 			}
 			auto i = Item(findSplitAfter(f.name, dirSeparator)[1], ident.text,
 				summary, storageClass == "enum" ? null : "auto");
@@ -403,8 +403,8 @@ private:
 			attrs = attributes[$ - 1];
 		if (attributes.length > 0) foreach (a; attrs)
 		{
-			if (isProtection(a.attribute))
-				protection = a.attribute;
+			if (isProtection(a.attribute.type))
+				protection = a.attribute.type;
 		}
 		switch (protection)
 		{
@@ -414,7 +414,7 @@ private:
 		}
 		if (attributes.length > 0) foreach (a; attrs)
 		{
-			if (!isProtection(a.attribute))
+			if (!isProtection(a.attribute.type))
 			{
 				formatter.format(a);
 				writer.put(" ");

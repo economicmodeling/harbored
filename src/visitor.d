@@ -77,7 +77,7 @@ class DocVisitor : ASTVisitor
 
 		mod.accept(this);
 
-		memberStack[$ - 1].write(output);
+		memberStack[$ - 1].write(output, outputDirectory);
 
 		output.writeln(HTML_END);
 		output.close();
@@ -305,7 +305,7 @@ private:
 		prevComments.length = prevComments.length + 1;
 		ad.accept(this);
 		prevComments = prevComments[0 .. $ - 1];
-		memberStack[$ - 1].write(f);
+		memberStack[$ - 1].write(f, outputDirectory);
 
 		stack = stack[0 .. $ - 1];
 		memberStack = memberStack[0 .. $ - 1];
@@ -474,7 +474,7 @@ private:
 					string link = buildPath(chain(stack[0 .. baseLength - 1],
 						only(stack[baseLength - 1.. $ - 1].join("."))));
 //					writeln(link, ".html");
-					f.write(`<a href="`, link, `.html">`);
+					f.write(`<a href="`, findSplitAfter(link, outputDirectory)[1], `.html">`);
 					f.write(stack[i]);
 					f.write(`</a>.`);
 				}
@@ -507,9 +507,7 @@ private:
 		memberStack.length = memberStack.length + 1;
 		string classDocFileName = format("%s.%s.html", moduleFileBase,
 			join(stack[baseLength .. $], ".").array);
-		string path = (classDocFileName.length > 2 && classDocFileName[0 .. 2] == "./")
-				? stripLeadingDirectory(classDocFileName[2 .. $])
-				: classDocFileName;
+		string path = stripLeadingDirectory(classDocFileName, outputDirectory);
 		searchIndex.writefln(`{"%s" : "%s"},`, join(stack, ".").array, path);
 		immutable size_t i = memberStack.length - 2;
 		assert (i < memberStack.length, "%s %s".format(i, memberStack.length));
@@ -648,10 +646,12 @@ string readAndWriteComment(File f, string comment, ref string[string] macros,
 /**
  * Returns: the input string with its first directory removed.
  */
-string stripLeadingDirectory(string s)
+string stripLeadingDirectory(string s, string outputDirectory)
 {
 	import std.algorithm : findSplitAfter;
 	import std.path : dirSeparator;
+	s = s.length > 2 && s[0 .. 2] == "./" ? s[2 .. $] : s;
+	s = s.startsWith(outputDirectory) ? s[outputDirectory.length .. $] : s;
 	return findSplitAfter(s, dirSeparator)[1];
 }
 
@@ -753,13 +753,13 @@ struct Item
 	string summary;
 	string type;
 
-	void write(File f)
+	void write(File f, string outputDirectory)
 	{
 		f.write(`<tr><td>`);
 		if (url == "#")
 			f.write(name, `</td>`);
 		else
-			f.write(`<a href="`, stripLeadingDirectory(url), `">`, name, `</a></td>`);
+			f.write(`<a href="`, findSplitAfter(url, outputDirectory)[1], `">`, name, `</a></td>`);
 		if (type is null)
 			f.write(`<td></td><td>`, summary ,`</td></tr>`);
 		else
@@ -780,7 +780,7 @@ struct Members
 	Item[] values;
 	Item[] variables;
 
-	void write(File f)
+	void write(File f, string outputDirectory)
 	{
 		if (aliases.length == 0 && classes.length == 0 && enums.length == 0
 			&& functions.length == 0 && interfaces.length == 0
@@ -791,23 +791,23 @@ struct Members
 		}
 		f.writeln(`<div class="section">`);
 		if (enums.length > 0)
-			write(f, enums, "Enums");
+			write(f, enums, "Enums", outputDirectory);
 		if (aliases.length > 0)
-			write(f, aliases, "Aliases");
+			write(f, aliases, "Aliases", outputDirectory);
 		if (variables.length > 0)
-			write(f, variables, "Variables");
+			write(f, variables, "Variables", outputDirectory);
 		if (functions.length > 0)
-			write(f, functions, "Functions");
+			write(f, functions, "Functions", outputDirectory);
 		if (structs.length > 0)
-			write(f, structs, "Structs");
+			write(f, structs, "Structs", outputDirectory);
 		if (interfaces.length > 0)
-			write(f, interfaces, "Interfaces");
+			write(f, interfaces, "Interfaces", outputDirectory);
 		if (classes.length > 0)
-			write(f, classes, "Classes");
+			write(f, classes, "Classes", outputDirectory);
 		if (templates.length > 0)
-			write(f, templates, "Templates");
+			write(f, templates, "Templates", outputDirectory);
 		if (values.length > 0)
-			write(f, values, "Values");
+			write(f, values, "Values", outputDirectory);
 		f.writeln(`</div>`);
 		foreach (f; overloadFiles)
 		{
@@ -818,13 +818,13 @@ struct Members
 
 private:
 
-	void write(File f, Item[] items, string name)
+	void write(File f, Item[] items, string name, string outputDirectory)
 	{
 		f.writeln(`<h3>`, name, `</h3>`);
 		f.writeln(`<table>`);
 //		f.writeln(`<thead><tr><th>Name</th><th>Summary</th></tr></thead>`);
 		foreach (i; items)
-			i.write(f);
+			i.write(f, outputDirectory);
 		f.writeln(`</table>`);
 	}
 }

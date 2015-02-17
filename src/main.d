@@ -48,7 +48,7 @@ int main(string[] args)
 	}
 
 	if (outputDirectory is null)
-		outputDirectory = "./doc";
+		outputDirectory = "doc";
 
 	generateDocumentation(outputDirectory, indexContent, macros, args[1 .. $]);
 

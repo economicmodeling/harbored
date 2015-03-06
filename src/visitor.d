@@ -618,7 +618,7 @@ string readAndWriteComment(File f, string comment, ref string[string] macros,
 	if (f != File.init)
 		writeComment(f, c, functionBody);
 	string rVal = "";
-	if (c.sections.length && c.sections[0].name == "Summary")
+	if (c.sections.length && c.sections[0].name is null)
 		rVal = c.sections[0].content;
 	else
 	{
@@ -668,19 +668,17 @@ private:
 
 void writeComment(File f, Comment comment, const FunctionBody functionBody = null)
 {
-//		writeln("writeComment: ", comment.sections.length, " sections.");
-
-	size_t i;
-	for (i = 0; i < comment.sections.length && (comment.sections[i].name == "Summary"
-		|| comment.sections[i].name == "description"); i++)
+	foreach (i; 0 .. 2)
 	{
+		if (comment.sections[i].content is null)
+			continue;
 		f.writeln(`<div class="section">`);
 		f.writeln(comment.sections[i].content);
 		f.writeln(`</div>`);
 	}
 	if (functionBody !is null)
 		writeContracts(f, functionBody.inStatement, functionBody.outStatement);
-	foreach (section; comment.sections[i .. $])
+	foreach (section; comment.sections[2 .. $])
 	{
 		if (section.name == "Macros")
 			continue;

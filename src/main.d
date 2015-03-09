@@ -115,9 +115,9 @@ Main Page</div>`);
 		try
 		{
 			writeDocumentation(outputDirectory, f, macros, moduleName, location, search);
-			string path = stripLeadingDirectory(location[2 .. $], outputDirectory);
 			if (moduleName != "")
 			{
+				immutable string path = stripLeadingDirectory(location[2 .. $], outputDirectory);
 				modules ~= moduleName;
 				moduleMap[moduleName] = path;
 			}

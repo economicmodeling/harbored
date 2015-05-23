@@ -18,7 +18,7 @@ import std.path;
 import std.stdio;
 import visitor;
 import unittest_preprocessor;
-import macros;
+import ddoc.macros;
 import tocbuilder;
 
 int main(string[] args)
@@ -40,7 +40,7 @@ int main(string[] args)
 
 	string[string] macros;
 	try
-		macros = readMacros(macroFiles);
+		macros = parseMacrosFile(macroFiles);
 	catch (Exception e)
 	{
 		stderr.writeln(e.msg);
@@ -53,16 +53,6 @@ int main(string[] args)
 	generateDocumentation(outputDirectory, indexContent, macros, args[1 .. $]);
 
 	return 0;
-}
-
-string[string] readMacros(const string[] macroFiles)
-{
-	string[string] rVal;
-	foreach (k, v; ddoc.macros.DEFAULT_MACROS)
-		rVal[k] = v;
-	foreach (mf; macroFiles)
-		readMacroFile(mf, rVal);
-	return rVal;
 }
 
 void generateDocumentation(string outputDirectory, string indexContent,

@@ -23,6 +23,9 @@ import tocbuilder;
 
 int main(string[] args)
 {
+	version(unittest)
+		return 0;
+
 	string[] macroFiles;
 	string[] excludes;
 	string outputDirectory;

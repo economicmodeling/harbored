@@ -508,6 +508,7 @@ private:
 		string classDocFileName = format("%s.%s.html", moduleFileBase,
 			join(stack[baseLength .. $], ".").array);
 		string path = stripLeadingDirectory(classDocFileName, outputDirectory);
+		stderr.writefln(`stripLeadingDirectory("%s", "%s"): "%s"`, classDocFileName, outputDirectory, path);
 		searchIndex.writefln(`{"%s" : "%s"},`, join(stack, ".").array, path);
 		immutable size_t i = memberStack.length - 2;
 		assert (i < memberStack.length, "%s %s".format(i, memberStack.length));
@@ -642,26 +643,35 @@ string readAndWriteComment(File f, string comment, ref string[string] macros,
 	}
 	return rVal;
 }
-
 /**
  * Returns: the input string with its first directory removed.
  */
-string stripLeadingDirectory(string s, string outputDirectory)
+string stripLeadingDirectory(string s, string outputDirectory) pure
 {
-	import std.algorithm : findSplitAfter;
-	import std.path : dirSeparator;
-	s = s.length > 2 && s[0 .. 2] == "./" ? s[2 .. $] : s;
-	s = s.startsWith(outputDirectory) ? s[outputDirectory.length .. $] : s;
-	return findSplitAfter(s, dirSeparator)[1];
+	import std.path : pathSplitter, buildPath;
+
+	auto r1 = pathSplitter(s);
+	auto r2 = pathSplitter(outputDirectory);
+	while (!r1.empty && !r2.empty && r1.front == r2.front)
+	{
+		r1.popFront();
+		r2.popFront();
+	}
+	return buildPath(r1);
 }
 
 ///
 unittest
 {
-	assert (stripLeadingDirectory(`foo/bar/baz`) == `bar/baz`);
-	assert (stripLeadingDirectory(`/foo/bar/baz`) == `bar/baz`);
-	assert (stripLeadingDirectory(`foo\bar\baz`) == `bar\baz`);
-	assert (stripLeadingDirectory(`C:\foo\bar\baz`) == `bar\baz`);
+	import std.stdio : stderr;
+
+	immutable a = stripLeadingDirectory("foo/bar/baz/", "foo");
+	assert(a == "bar/baz", a);
+	immutable b = stripLeadingDirectory("/home/user/project/docs", "/home/user/project/docs");
+	assert(b == "", b);
+	immutable c = stripLeadingDirectory("/home/user/project/docs/file.name.html",
+		"/home/user/project/docs");
+	assert(c == "file.name.html", c);
 }
 
 private:

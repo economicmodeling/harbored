@@ -15,6 +15,13 @@ all: $(SRC)
 	dmd $(SRC) $(IMPORTS) $(FLAGS) -ofbin/harbored
 	rm -f bin/*.o
 
+unittest: $(SRC)
+	dmd $(SRC) $(IMPORTS) -unittest -ofbin/harbored-tests
+	./bin/harbored-tests
+	rm -f bin/*.o
+	rm -f bin/harbored-tests
+
+
 clean:
 	rm -rf bin/
 

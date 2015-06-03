@@ -120,7 +120,7 @@ Main Page</div>`);
 			writeDocumentation(outputDirectory, f, macros, moduleName, location, search);
 			if (moduleName != "")
 			{
-				immutable string path = stripLeadingDirectory(location[2 .. $], outputDirectory);
+				immutable string path = stripLeadingDirectory(location, outputDirectory);
 				modules ~= moduleName;
 				moduleMap[moduleName] = path;
 			}
@@ -189,9 +189,7 @@ function toggleChildren(t) {
 	toc.writeln(`<ul>`);
 
 	sort(modules);
-	TocItem[] tocItems = buildTree(modules, moduleMap);
-	foreach (t; tocItems)
-		t.write(toc);
+	buildTree(modules, moduleMap).each!(a => a.write(toc));
 	toc.writeln(`</ul></body></html>`);
 }
 

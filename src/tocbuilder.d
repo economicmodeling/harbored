@@ -3,14 +3,14 @@ module tocbuilder;
 import std.algorithm;
 import std.stdio;
 
-struct TocItem
+private struct TocItem
 {
 	string name;
 	string url;
 	TocItem[] items;
 	void write(File output, size_t indent = 0)
 	{
-		bool hasChildren = items.length != 0;
+		immutable hasChildren = items.length != 0;
 		foreach (i; 0 .. indent)
 			output.write("    ");
 		if (url !is null)
@@ -42,8 +42,8 @@ TocItem[] buildTree(string[] strings, string[string] links, size_t offset = 0)
 	{
 		size_t j = i + 1;
 		auto s = strings[i][offset .. $].findSplit(".");
-		string prefix = s[0];
-		string suffix = s[2];
+		immutable string prefix = s[0];
+		immutable string suffix = s[2];
 		TocItem item;
 		item.name = strings[i][offset .. offset + prefix.length];
 		if (prefix.length != 0 && suffix.length != 0)

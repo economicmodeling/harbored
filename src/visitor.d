@@ -171,8 +171,7 @@ class DocVisitor : ASTVisitor
 				writeBreadcrumbs(f);
 				string type = writeAliasType(f, name.text, ad.type);
 				string summary = readAndWriteComment(f, ad.comment, macros, prevComments);
-				memberStack[$ - 2].aliases ~= Item(findSplitAfter(f.name, dirSeparator)[1],
-					name.text, summary, type);
+				memberStack[$ - 2].aliases ~= Item(f.name, name.text, summary, type);
 			}
 		}
 		else foreach (initializer; ad.initializers)
@@ -182,8 +181,7 @@ class DocVisitor : ASTVisitor
 			writeBreadcrumbs(f);
 			string type = writeAliasType(f, initializer.name.text, initializer.type);
 			string summary = readAndWriteComment(f, ad.comment, macros, prevComments);
-			memberStack[$ - 2].aliases ~= Item(findSplitAfter(f.name, dirSeparator)[1],
-				initializer.name.text, summary, type);
+			memberStack[$ - 2].aliases ~= Item(f.name, initializer.name.text, summary, type);
 		}
 	}
 
@@ -200,8 +198,7 @@ class DocVisitor : ASTVisitor
 			string summary = readAndWriteComment(f,
 				dec.comment is null ? vd.comment : dec.comment, macros,
 				prevComments);
-			memberStack[$ - 2].variables ~= Item(findSplitAfter(f.name, dirSeparator)[1],
-				dec.name.text, summary, formatNode(vd.type));
+			memberStack[$ - 2].variables ~= Item(f.name, dec.name.text, summary, formatNode(vd.type));
 		}
 		if (vd.comment !is null && vd.autoDeclaration !is null) foreach (ident; vd.autoDeclaration.identifiers)
 		{
@@ -215,7 +212,7 @@ class DocVisitor : ASTVisitor
 				if (storage !is null)
 					storageClass = str(storage.token.type);
 			}
-			auto i = Item(findSplitAfter(f.name, dirSeparator)[1], ident.text,
+			auto i = Item(f.name, ident.text,
 				summary, storageClass == "enum" ? null : "auto");
 			if (storageClass == "enum")
 				memberStack[$ - 2].enums ~= i;
@@ -301,7 +298,7 @@ private:
 		}
 		string summary = readAndWriteComment(f, ad.comment, macros, prevComments,
 			null, getUnittestDocTuple(ad));
-		mixin(`memberStack[$ - 2].` ~ name ~ ` ~= Item(findSplitAfter(f.name, dirSeparator)[1], ad.name.text, summary);`);
+		mixin(`memberStack[$ - 2].` ~ name ~ ` ~= Item(f.name, ad.name.text, summary);`);
 		prevComments.length = prevComments.length + 1;
 		ad.accept(this);
 		prevComments = prevComments[0 .. $ - 1];
@@ -379,7 +376,7 @@ private:
 			fdName = fn.name.text;
 		else
 			fdName = "this";
-		memberStack[$ - 2].functions ~= Item(findSplitAfter(f.name, dirSeparator)[1], fdName, summary);
+		memberStack[$ - 2].functions ~= Item(f.name, fdName, summary);
 		prevComments.length = prevComments.length + 1;
 		fn.accept(this);
 		prevComments = prevComments[0 .. $ - 1];
@@ -474,7 +471,7 @@ private:
 					string link = buildPath(chain(stack[0 .. baseLength - 1],
 						only(stack[baseLength - 1.. $ - 1].join("."))));
 //					writeln(link, ".html");
-					f.write(`<a href="`, findSplitAfter(link, outputDirectory)[1], `.html">`);
+					f.write(`<a href="`, stripLeadingDirectory(link, outputDirectory), `.html">`);
 					f.write(stack[i]);
 					f.write(`</a>.`);
 				}
@@ -507,8 +504,7 @@ private:
 		memberStack.length = memberStack.length + 1;
 		string classDocFileName = format("%s.%s.html", moduleFileBase,
 			join(stack[baseLength .. $], ".").array);
-		string path = stripLeadingDirectory(classDocFileName, outputDirectory);
-		stderr.writefln(`stripLeadingDirectory("%s", "%s"): "%s"`, classDocFileName, outputDirectory, path);
+		immutable string path = stripLeadingDirectory(classDocFileName, outputDirectory);
 		searchIndex.writefln(`{"%s" : "%s"},`, join(stack, ".").array, path);
 		immutable size_t i = memberStack.length - 2;
 		assert (i < memberStack.length, "%s %s".format(i, memberStack.length));
@@ -646,7 +642,7 @@ string readAndWriteComment(File f, string comment, ref string[string] macros,
 /**
  * Returns: the input string with its first directory removed.
  */
-string stripLeadingDirectory(string s, string outputDirectory) pure
+string stripLeadingDirectory(string s, string outputDirectory)
 {
 	import std.path : pathSplitter, buildPath;
 
@@ -767,7 +763,7 @@ struct Item
 		if (url == "#")
 			f.write(name, `</td>`);
 		else
-			f.write(`<a href="`, findSplitAfter(url, outputDirectory)[1], `">`, name, `</a></td>`);
+			f.write(`<a href="`, stripLeadingDirectory(url, outputDirectory), `">`, name, `</a></td>`);
 		if (type is null)
 			f.write(`<td></td><td>`, summary ,`</td></tr>`);
 		else
@@ -830,7 +826,6 @@ private:
 	{
 		f.writeln(`<h3>`, name, `</h3>`);
 		f.writeln(`<table>`);
-//		f.writeln(`<thead><tr><th>Name</th><th>Summary</th></tr></thead>`);
 		foreach (i; items)
 			i.write(f, outputDirectory);
 		f.writeln(`</table>`);

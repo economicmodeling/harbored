@@ -615,7 +615,7 @@ string readAndWriteComment(File f, string comment, ref string[string] macros,
 	if (f != File.init)
 		writeComment(f, c, functionBody);
 	string rVal = "";
-	if (c.sections.length && c.sections[0].name is null)
+	if (c.sections.length && c.sections[0].content !is null)
 		rVal = c.sections[0].content;
 	else
 	{

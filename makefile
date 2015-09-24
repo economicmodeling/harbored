@@ -16,7 +16,7 @@ all: $(SRC)
 	rm -f bin/*.o
 
 unittest: $(SRC)
-	dmd $(SRC) $(IMPORTS) -unittest -ofbin/harbored-tests
+	dmd $(SRC) $(IMPORTS) -g -unittest -ofbin/harbored-tests
 	./bin/harbored-tests
 	rm -f bin/*.o
 	rm -f bin/harbored-tests

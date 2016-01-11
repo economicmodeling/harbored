@@ -8,9 +8,9 @@ module visitor;
 
 import ddoc.comments;
 import std.algorithm;
-import std.d.ast;
-import std.d.formatter;
-import std.d.lexer;
+import dparse.ast;
+import dparse.formatter;
+import dparse.lexer;
 import std.file;
 import std.path;
 import std.stdio;
@@ -602,7 +602,7 @@ string readAndWriteComment(File f, string comment, ref string[string] macros,
 	Comment[] prevComments = null, const FunctionBody functionBody = null,
 	Tuple!(string, string)[] testDocs = null)
 {
-	import std.d.lexer : unDecorateComment;
+	import dparse.lexer : unDecorateComment;
 	import std.array : appender;
 	auto app = appender!string();
 	comment.unDecorateComment(app);

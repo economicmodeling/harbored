@@ -10,9 +10,14 @@ IMPORTS:=-Ilibdparse/src\
 	-Jstrings
 
 FLAGS:=-O -inline
+DEBUG_FLAGS:=-g
 
 all: $(SRC)
 	dmd $(SRC) $(IMPORTS) $(FLAGS) -ofbin/harbored
+	rm -f bin/*.o
+
+debug: $(SRC)
+	dmd $(SRC) $(IMPORTS) $(DEBUG_FLAGS) -ofbin/harbored
 	rm -f bin/*.o
 
 unittest: $(SRC)

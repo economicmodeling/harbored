@@ -602,12 +602,9 @@ string readAndWriteComment(File f, string comment, ref string[string] macros,
 	Comment[] prevComments = null, const FunctionBody functionBody = null,
 	Tuple!(string, string)[] testDocs = null)
 {
-	import dparse.lexer : unDecorateComment;
-	import std.array : appender;
-	auto app = appender!string();
-	comment.unDecorateComment(app);
-//		writeln(comment, " undecorated to ", app.data);
-	Comment c = parseComment(app.data, macros);
+	assert(comment !is null);
+
+	Comment c = parseComment(comment, macros);
 	if (c.isDitto)
 		c = prevComments[$ - 1];
 	else if (prevComments.length > 0)
@@ -630,9 +627,7 @@ string readAndWriteComment(File f, string comment, ref string[string] macros,
 //		writeln("Writing a unittest doc comment");
 		import std.string : outdent;
 		f.writeln(`<div class="section"><h3>Example</h3>`);
-		auto docApp = appender!string();
-		doc[1].unDecorateComment(docApp);
-		Comment dc = parseComment(docApp.data, macros);
+		Comment dc = parseComment(doc[1], macros);
 		writeComment(f, dc);
 		f.writeln(`<pre><code>`, outdent(doc[0]), `</code></pre>`);
 		f.writeln(`</div>`);

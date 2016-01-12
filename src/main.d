@@ -20,6 +20,7 @@ import visitor;
 import unittest_preprocessor;
 import macros;
 import tocbuilder;
+import ddoc.comments;
 
 int main(string[] args)
 {
@@ -95,7 +96,8 @@ Main Page</div>`);
 			File indexContentFile = File(indexContent);
 			ubyte[] indexContentBytes = new ubyte[cast(uint) indexContentFile.size];
 			indexContentFile.rawRead(indexContentBytes);
-			readAndWriteComment(frontPage, cast(string) indexContentBytes, macros);
+			Comment[] prev;
+			readAndWriteComment(frontPage, cast(string) indexContentBytes, macros, prev);
 			frontPage.writeln(`
 	</body>
 </html>`);

@@ -67,8 +67,6 @@ class DocVisitor : ASTVisitor
 
 		writeBreadcrumbs(output);
 
-		prevComments.length = 1;
-
 		if (mod.moduleDeclaration.comment !is null)
 			readAndWriteComment(output, mod.moduleDeclaration.comment, macros,
 				prevComments, null, getUnittestDocTuple(mod.moduleDeclaration));
@@ -190,14 +188,12 @@ class DocVisitor : ASTVisitor
 		bool first;
 		foreach (const Declarator dec; vd.declarators)
 		{
-			if (vd.comment is null && dec.comment is null)
+			if (dec.comment is null)
 				continue;
 			File f = pushSymbol(dec.name.text, first);
 			scope(exit) popSymbol(f);
 			writeBreadcrumbs(f);
-			string summary = readAndWriteComment(f,
-				dec.comment is null ? vd.comment : dec.comment, macros,
-				prevComments);
+			string summary = readAndWriteComment(f, dec.comment, macros, prevComments);
 			memberStack[$ - 2].variables ~= Item(f.name, dec.name.text, summary, formatNode(vd.type));
 		}
 		if (vd.comment !is null && vd.autoDeclaration !is null) foreach (ident; vd.autoDeclaration.identifiers)
@@ -266,6 +262,9 @@ class DocVisitor : ASTVisitor
 		writeFnDocumentation(f, fd, attributes[$ - 1], first);
 	}
 
+	// Deliberately skip unittests
+	override void visit(const Unittest) {}
+
 	alias visit = ASTVisitor.visit;
 
 	/// The module name in "package.package.module" format.
@@ -274,6 +273,14 @@ class DocVisitor : ASTVisitor
 	/// The path to the HTML file that was generated for the module being
 	/// processed.
 	string location;
+
+	invariant
+	{
+		foreach (c; prevComments[])
+		{
+			assert(c.sections.length >= 2);
+		}
+	}
 
 private:
 
@@ -299,9 +306,7 @@ private:
 		string summary = readAndWriteComment(f, ad.comment, macros, prevComments,
 			null, getUnittestDocTuple(ad));
 		mixin(`memberStack[$ - 2].` ~ name ~ ` ~= Item(f.name, ad.name.text, summary);`);
-		prevComments.length = prevComments.length + 1;
 		ad.accept(this);
-		prevComments = prevComments[0 .. $ - 1];
 		memberStack[$ - 1].write(f, outputDirectory);
 
 		stack = stack[0 .. $ - 1];
@@ -377,9 +382,7 @@ private:
 		else
 			fdName = "this";
 		memberStack[$ - 2].functions ~= Item(f.name, fdName, summary);
-		prevComments.length = prevComments.length + 1;
 		fn.accept(this);
-		prevComments = prevComments[0 .. $ - 1];
 		stack = stack[0 .. $ - 1];
 		memberStack = memberStack[0 .. $ - 1];
 	}
@@ -599,16 +602,24 @@ void writeHeader(File f, string title, size_t depth)
  * Returns: the summary from the given comment
  */
 string readAndWriteComment(File f, string comment, ref string[string] macros,
-	Comment[] prevComments = null, const FunctionBody functionBody = null,
+	ref Comment[] prevComments, const FunctionBody functionBody = null,
 	Tuple!(string, string)[] testDocs = null)
 {
 	assert(comment !is null);
+	assert(comment.length);
 
 	Comment c = parseComment(comment, macros);
+	assert(c.sections.length >= 2);
 	if (c.isDitto)
-		c = prevComments[$ - 1];
-	else if (prevComments.length > 0)
-		prevComments[$ - 1] = c;
+	{
+		if (prevComments.length)
+			c = prevComments[$ - 1];
+		else
+			stderr.writeln("Found 'ditto' comment without preceding comment to copy.");
+	}
+	else
+		prevComments ~= c;
+
 	if (f != File.init)
 		writeComment(f, c, functionBody);
 	string rVal = "";
@@ -668,6 +679,11 @@ unittest
 private:
 
 void writeComment(File f, Comment comment, const FunctionBody functionBody = null)
+in
+{
+	assert(comment.sections.length >= 2);
+}
+body
 {
 	foreach (i; 0 .. 2)
 	{

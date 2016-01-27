@@ -606,7 +606,6 @@ string readAndWriteComment(File f, string comment, ref string[string] macros,
 	Tuple!(string, string)[] testDocs = null)
 {
 	assert(comment !is null);
-	assert(comment.length);
 
 	Comment c = parseComment(comment, macros);
 	assert(c.sections.length >= 2);

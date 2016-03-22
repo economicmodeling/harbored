@@ -1,0 +1,13 @@
+{
+	"name": "harbored",
+	"targetPath": "bin",
+	"targetType": "executable",
+	"description": "Documentation generator for D",
+	"copyright": "Copyright © 2014-2015, Economic Modeling Specialists, Intl.",
+	"authors": [ "Brian Schott" ],
+	"stringImportPaths": [ "strings" ],
+	"dependencies": {
+		"libddoc": { "path": "./libddoc" },
+		"libdparse": { "path": "./libdparse" }
+	}
+}

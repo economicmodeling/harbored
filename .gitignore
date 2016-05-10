@@ -1,1 +1,5 @@
-bin/
+bin
+harbored
+doc
+dub.selections.json
+.dub

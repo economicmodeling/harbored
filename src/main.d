@@ -61,8 +61,9 @@ int main(string[] args)
 
 string[string] readMacros(const string[] macroFiles)
 {
+	import ddoc.macros : DEFAULT_MACROS;
 	string[string] rVal;
-	foreach (k, v; ddoc.macros.DEFAULT_MACROS)
+	foreach (k, v; DEFAULT_MACROS)
 		rVal[k] = v;
 	foreach (mf; macroFiles)
 		readMacroFile(mf, rVal);
@@ -73,7 +74,7 @@ void generateDocumentation(string outputDirectory, string indexContent,
 	string[string] macros, string[] args)
 {
 	string[] files = getFilesToProcess(args);
-	import std.stdio;
+	import std.stdio : stderr, File;
 	stderr.writeln("Writing documentation to ", outputDirectory);
 
 	mkdirRecurse(outputDirectory);
@@ -237,8 +238,8 @@ enum helpString = `
 Generates documentation for D source code.
 
 Usage:
-    doctool [Options] file.d
-    doctool [Options] directory1/ directory2/ ...
+    harbored [Options] file.d
+    harbored [Options] directory1/ directory2/ ...
 
 Options:
     --macros | -m MACRO_FILE

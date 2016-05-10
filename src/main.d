@@ -201,6 +201,8 @@ void writeDocumentation(string outputDirectory, string path,
 	string[string] macros, ref string moduleName, ref string location,
 	File search)
 {
+	import dparse.rollback_allocator : RollbackAllocator;
+
 	LexerConfig config;
 	config.fileName = path;
 	config.stringBehavior = StringBehavior.source;
@@ -210,7 +212,8 @@ void writeDocumentation(string outputDirectory, string path,
 	f.rawRead(fileBytes);
 	StringCache cache = StringCache(1024 * 4);
 	auto tokens = getTokensForParser(fileBytes, config, &cache).array;
-	Module m = parseModule(tokens, path, null, &doNothing);
+	RollbackAllocator rba;
+	Module m = parseModule(tokens, path, &rba, &doNothing);
 	TestRange[][size_t] unitTestMapping = getUnittestMap(m);
 	DocVisitor visitor = new DocVisitor(outputDirectory, macros, search,
 		unitTestMapping, fileBytes);

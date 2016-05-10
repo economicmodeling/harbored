@@ -1,6 +1,6 @@
 {
 	"name": "harbored",
-	"dsecription": "Documentation generator for D code",
+	"description": "Documentation generator for D code",
 	"copyright": "© Economic Modeling Specialists International",
 	"authors": ["Brian Schott"],
 	"license" : "Boost Software License - Version 1.0",

@@ -33,7 +33,7 @@ class DocVisitor : ASTVisitor
 	 *     fileBytes = The source code of the module as a byte array.
 	 */
 	this(string outputDirectory, string[string] macros, File searchIndex,
-		TestRange[][size_t] unitTestMapping, const(ubyte[]) fileBytes)
+		const TestRange[][size_t] unitTestMapping, const(ubyte[]) fileBytes)
 	{
 		this.outputDirectory = outputDirectory;
 		this.macros = macros;
@@ -160,9 +160,9 @@ class DocVisitor : ASTVisitor
 		if (ad.comment is null)
 			return;
 		bool first;
-		if (ad.identifierList !is null)
+		if (ad.declaratorIdentifierList !is null)
 		{
-			foreach (name; ad.identifierList.identifiers)
+			foreach (name; ad.declaratorIdentifierList.identifiers)
 			{
 				File f = pushSymbol(name.text, first);
 				scope(exit) popSymbol(f);
@@ -196,9 +196,11 @@ class DocVisitor : ASTVisitor
 			string summary = readAndWriteComment(f, dec.comment, macros, prevComments);
 			memberStack[$ - 2].variables ~= Item(f.name, dec.name.text, summary, formatNode(vd.type));
 		}
-		if (vd.comment !is null && vd.autoDeclaration !is null) foreach (ident; vd.autoDeclaration.identifiers)
+		if (vd.comment is null || vd.autoDeclaration is null)
+			return;
+		foreach (part; vd.autoDeclaration.parts)
 		{
-			File f = pushSymbol(ident.text, first);
+			File f = pushSymbol(part.identifier.text, first);
 			scope(exit) popSymbol(f);
 			writeBreadcrumbs(f);
 			string summary = readAndWriteComment(f, vd.comment, macros, prevComments);
@@ -208,7 +210,7 @@ class DocVisitor : ASTVisitor
 				if (storage !is null)
 					storageClass = str(storage.token.type);
 			}
-			auto i = Item(f.name, ident.text,
+			auto i = Item(f.name, part.identifier.text,
 				summary, storageClass == "enum" ? null : "auto");
 			if (storageClass == "enum")
 				memberStack[$ - 2].enums ~= i;
@@ -551,7 +553,7 @@ private:
 	string[string] macros;
 	Members[] memberStack;
 	File searchIndex;
-	TestRange[][size_t] unitTestMapping;
+	const TestRange[][size_t] unitTestMapping;
 	const(ubyte[]) fileBytes;
 }
 

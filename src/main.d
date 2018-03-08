@@ -213,8 +213,9 @@ void writeDocumentation(string outputDirectory, string path,
 	StringCache cache = StringCache(1024 * 4);
 	auto tokens = getTokensForParser(fileBytes, config, &cache).array;
 	RollbackAllocator rba;
+	void doNothing(string, size_t, size_t, string, bool) {}
 	Module m = parseModule(tokens, path, &rba, &doNothing);
-	TestRange[][size_t] unitTestMapping = getUnittestMap(m);
+	const TestRange[][size_t] unitTestMapping = getUnittestMap(m);
 	DocVisitor visitor = new DocVisitor(outputDirectory, macros, search,
 		unitTestMapping, fileBytes);
 	visitor.visit(m);
@@ -265,8 +266,6 @@ Options:
     --help | -h
         Prints this message.
 `;
-
-void doNothing(string, size_t, size_t, string, bool) {}
 
 immutable string hljs = import("highlight.pack.js");
 immutable string stylecss = import("style.css");

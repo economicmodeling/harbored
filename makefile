@@ -3,10 +3,13 @@
 SRC:=src/*.d\
 	libddoc/src/ddoc/*.d\
 	libdparse/src/std/experimental/*.d\
-	libdparse/src/dparse/*.d
+	libdparse/src/dparse/*.d\
+	stdx-allocator/source/stdx/allocator/mallocator.d\
+	stdx-allocator/source/stdx/allocator/common.d\
 
 IMPORTS:=-Ilibdparse/src\
 	-Ilibddoc/src\
+	-Istdx-allocator/source\
 	-Jstrings
 
 FLAGS:=-O -inline
@@ -21,7 +24,7 @@ debug: $(SRC)
 	rm -f bin/*.o
 
 unittest: $(SRC)
-	dmd $(SRC) $(IMPORTS) -g -unittest -ofbin/harbored-tests
+	dmd $(SRC) stdx-allocator/source/stdx/allocator/internal.d $(IMPORTS) -g -unittest -ofbin/harbored-tests
 	./bin/harbored-tests
 	rm -f bin/*.o
 	rm -f bin/harbored-tests

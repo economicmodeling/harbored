@@ -694,8 +694,9 @@ body
 		f.writeln(comment.sections[i].content);
 		f.writeln(`</div>`);
 	}
-	if (functionBody !is null)
-		writeContracts(f, functionBody.inStatement, functionBody.outStatement);
+	if (functionBody !is null && functionBody.specifiedFunctionBody !is null &&
+            functionBody.specifiedFunctionBody.functionContracts.length > 0)
+		writeContracts(f, functionBody.specifiedFunctionBody.functionContracts);
 	foreach (section; comment.sections[2 .. $])
 	{
 		if (section.name == "Macros")
@@ -728,23 +729,19 @@ body
 	}
 }
 
-void writeContracts(File f, const InStatement inStatement,
-	const OutStatement outStatement)
+void writeContracts(File f, const FunctionContract[] contracts)
 {
-	if (inStatement is null && outStatement is null)
-		return;
-	f.write(`<div class="section"><h3>Contracts</h3><pre><code>`);
-	auto formatter = new Formatter!(File.LockingTextWriter)(f.lockingTextWriter());
-	scope(exit) formatter.sink = File.LockingTextWriter.init;
-	if (inStatement !is null)
-	{
-		formatter.format(inStatement);
-		if (outStatement !is null)
-			f.writeln();
-	}
-	if (outStatement !is null)
-		formatter.format(outStatement);
-	f.writeln("</code></pre></div>");
+    auto writer = f.lockingTextWriter();
+    auto formatter = new Formatter!(File.LockingTextWriter)(writer);
+    scope(exit) formatter.sink = File.LockingTextWriter.init;
+    writer.put("<div class=\"section\"><h3>Contracts</h3>\n");
+    foreach (contract; contracts)
+    {
+        writer.put("<pre><code>\n");
+        formatter.format(contract);
+        writer.put("</code></pre>\n");
+    }
+    writer.put("</div>\n");
 }
 
 string prettySectionName(string sectionName)

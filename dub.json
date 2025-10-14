@@ -7,7 +7,7 @@
 	"targetType": "executable",
 	"stringImportPaths": ["strings"],
 	"dependencies": {
-		"libdparse": "~>0.8.0-alpha.3",
-		"libddoc": "~>0.3.0-beta.1"
+		"libdparse": "~>0.25.0",
+		"libddoc": "~>0.8.0"
 	}
 }

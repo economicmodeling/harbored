@@ -684,7 +684,7 @@ in
 {
 	assert(comment.sections.length >= 2);
 }
-body
+do
 {
 	foreach (i; 0 .. 2)
 	{
@@ -822,10 +822,10 @@ struct Members
 		if (values.length > 0)
 			write(f, values, "Values", outputDirectory);
 		f.writeln(`</div>`);
-		foreach (f; overloadFiles)
+		foreach (file; overloadFiles)
 		{
-			f.writeln(HTML_END);
-			f.close();
+			file.writeln(HTML_END);
+			file.close();
 		}
 	}
 

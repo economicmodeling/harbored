@@ -4,28 +4,13 @@ DC?=dmd
 
 SRC:=src/*.d\
 	libddoc/src/ddoc/*.d\
+	libddoc/common/source/ddoc/*.d\
 	libdparse/src/std/experimental/*.d\
-	libdparse/src/dparse/*.d\
-	stdx-allocator/source/stdx/allocator/common.d\
-	stdx-allocator/source/stdx/allocator/gc_allocator.d\
-	stdx-allocator/source/stdx/allocator/internal.d\
-	stdx-allocator/source/stdx/allocator/mallocator.d\
-	stdx-allocator/source/stdx/allocator/building_blocks/bitmapped_block.d\
-	stdx-allocator/source/stdx/allocator/building_blocks/stats_collector.d\
-	stdx-allocator/source/stdx/allocator/building_blocks/segregator.d\
-	stdx-allocator/source/stdx/allocator/building_blocks/region.d\
-	stdx-allocator/source/stdx/allocator/building_blocks/null_allocator.d\
-	stdx-allocator/source/stdx/allocator/building_blocks/free_list.d\
-	stdx-allocator/source/stdx/allocator/building_blocks/fallback_allocator.d\
-	stdx-allocator/source/stdx/allocator/building_blocks/allocator_list.d\
-	stdx-allocator/source/stdx/allocator/building_blocks/bucketizer.d\
-	stdx-allocator/source/stdx/allocator/mmap_allocator.d\
-	stdx-allocator/source/stdx/allocator/package.d\
-	stdx-allocator/source/stdx/allocator/typed.d
+	libdparse/src/dparse/*.d
 
 IMPORTS:=-Ilibdparse/src\
 	-Ilibddoc/src\
-	-Istdx-allocator/source\
+	-Ilibddoc/common/source/ddoc\
 	-Jstrings
 
 FLAGS:=-O -inline
